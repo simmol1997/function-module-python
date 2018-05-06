@@ -35,8 +35,8 @@ class Function:
             return self.eval(func_or_num)
 
         elif isinstance(func_or_num, Function):
-            def func(x):
-                return self.eval(func_or_num(x))
+            def func(num):
+                return self.eval(func_or_num(num))
             return Function(func)
 
         else:
@@ -44,8 +44,8 @@ class Function:
 
     def __neg__(self):
         """Return a new instance of Function that evaluates as -self.eval."""
-        def func(x):
-            return -self.eval(x)
+        def func(arg):
+            return -self.eval(arg)
         return Function(func)
 
     def __pos__(self):
@@ -61,15 +61,17 @@ class Function:
         Example: exp + sin, would return a new Function that evaluates according to e^x + sin(x).
         """
         if isinstance(func_or_num, Function):
-            def added(x):
-                return self.eval(x) + func_or_num.eval(x)
+            def added(arg):
+                return self.eval(arg) + func_or_num.eval(arg)
 
         elif isinstance(func_or_num, Number):
-            def added(x):
-                return self.eval(x) + func_or_num
+            def added(arg):
+                return self.eval(arg) + func_or_num
 
         else:
-            raise TypeError("unsupported operand type for +. Functions can only be added with real numbers or other functions.")
+            raise TypeError("unsupported operand type for +.\
+            Functions can only be added with real numbers or\
+            other functions.")
 
         return Function(added)
 
@@ -86,15 +88,17 @@ class Function:
         Example: exp - sin, would return a Function that evaluates to e^x - sin(x).
         """
         if isinstance(func_or_num, Function):
-            def subtracted(x):
-                return self.eval(x) - func_or_num.eval(x)
+            def subtracted(arg):
+                return self.eval(arg) - func_or_num.eval(arg)
 
         elif isinstance(func_or_num, Number):
-            def subtracted(x):
-                return self.eval(x) - func_or_num
+            def subtracted(arg):
+                return self.eval(arg) - func_or_num
 
         else:
-            raise TypeError("unsupported operand type for -. Functions can only be subtracted with real numbers or other functions.")
+            raise TypeError("unsupported operand type for -.\
+            Functions can only be subtracted with real numbers or\
+            other functions.")
 
         return Function(subtracted)
 
@@ -112,15 +116,17 @@ class Function:
         Example: exp * sin, would return a Function that evaluates to e^x * sin(x).
         """
         if isinstance(func_or_num, Function):
-            def multiplied(x):
-                return self.eval(x) * func_or_num.eval(x)
+            def multiplied(arg):
+                return self.eval(arg) * func_or_num.eval(arg)
 
         elif isinstance(func_or_num, Number):
-            def multiplied(x):
-                return self.eval(x) * func_or_num
+            def multiplied(arg):
+                return self.eval(arg) * func_or_num
 
         else:
-            raise TypeError("unsupported operand type for *. Functions can only be multiplied with real numbers or other functions.")
+            raise TypeError("unsupported operand type for *.\
+            Functions can only be multiplied with real numbers or\
+            other functions.")
 
         return Function(multiplied)
 
@@ -139,29 +145,31 @@ class Function:
         # Here special consideration is needed in order to
         # handle cases where func_or_num evaluates to 0
         if isinstance(func_or_num, Function):
-            def divided(x):
-                if func_or_num.eval(x) == 0:
+            def divided(arg):
+                if func_or_num.eval(arg) == 0:
                     return float("nan")
-                return self.eval(x) / func_or_num.eval(x)
+                return self.eval(arg) / func_or_num.eval(arg)
 
         elif isinstance(func_or_num, Number):
             if func_or_num == 0:
-                def divided(x):
+                def divided(arg):
                     return float("nan")
             else:
-                def divided(x):
-                    return self.eval(x) / func_or_num
+                def divided(arg):
+                    return self.eval(arg) / func_or_num
 
         else:
-            raise TypeError("unsupported operand type for /. Functions can only be divided with real numbers or other functions.")
+            raise TypeError("unsupported operand type for /.\
+            Functions can only be divided with real numbers or\
+            other functions.")
 
         return Function(divided)
 
     def __rtruediv__(self, func_or_num):
         """Does (1/self) * func_or_num instead"""
-        def inverse(x):
-            val = self.eval(x)
-            if (val == 0):
+        def inverse(arg):
+            val = self.eval(arg)
+            if val == 0:
                 return float("nan")
             return 1/val
         f = Function(inverse)
@@ -178,4 +186,4 @@ arccos = Function(math.acos)
 tan = Function(math.tan)
 arctan = Function(math.atan)
 sqrt = Function(math.sqrt)
-x = Function(lambda x: x) # Identity function
+x = Function(lambda arg: arg) # Identity function
