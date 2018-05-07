@@ -205,11 +205,15 @@ class Function:
         return exp_self.__pow__(ln_func_or_num)
 
 
-    def derivative(self, dx=0.001):
-        """Return a new instance of Function that evaluates to the derivative of this function in each point.
+    def derivative(self, dx=0.0001):
+        """Return a new instance of Function that evaluates to the derivative of this
+        function in each point.
 
         Keyword arguments:
-        dx -- a real number that determines the step in the two point difference method for calculating derivatives (defaults to 0.001).
+        dx --   a real number that determines the step in the two point difference method
+                for calculating derivatives (defaults to 0.0001).
+
+        Using the two point differential method ensures that the result is as close as O(dx^2).
         """
         def deriv(arg, h):
             if math.isnan(self.eval(arg)):
@@ -219,18 +223,18 @@ class Function:
             f_posh = self.eval(arg+h)
             f_negh = self.eval(arg-h)
 
-            # Defaults to the one point difference method if either of the points is nan since we happened to come across a singularity
+            # Defaults to the one point difference method if either of the points is
+            # nan. This means we happened to come across a singularity.
             if math.isnan(f_posh):
                 f_posh = self.eval(arg)
                 h = h/2
             elif math.isnan(f_negh):
                 f_negh = self.eval(arg)
-                h = h/2
-            
+                h = h/2          
             df = f_posh - f_negh
             return df/(2*h)
 
-        return Function(lambda arg: deriv(arg,dx))
+        return Function(lambda arg: deriv(arg, dx))
 
 
 
