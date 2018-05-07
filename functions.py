@@ -1,7 +1,10 @@
 """This module provides basic manipulation of mathematical functions."""
 
 import math
-from numbers import Number #Used only for checking isinstance(n, Number)
+from numbers import Number # Used only for checking isinstance(n, Number)
+from multiprocessing import Process # Used by the plot method in the Function class
+
+import matplotlib.pyplot as plt
 
 __all__ = []
 __version__ = "1.0"
@@ -253,7 +256,7 @@ class Function:
         Keyword arguments:
         start -- A real number being the startingpoint of the integral.
         end -- A real number being the endpoint of the integral.
-        init_step -- The initial value of the interval size.
+        init_step -- The initial value of the interval size (defaults to 1e-4).
 
         The algorithm uses a version of Simpson's 3/8 rule where the step size is
         decreased and increased based on the functions derivative.
@@ -291,6 +294,34 @@ class Function:
         acc_int += (h/8)*(f(x_i) + 3*f((3*x_i + h)/3) + 3*f((3*x_i + 2*h)/3) + f(x_i + h))
 
         return acc_int
+
+    def plot(self, start, end, step=0.01):
+        """Start a new process that shows the plot of the function from start to end.
+
+        Keyword arguments:
+        start -- The real number at which the x-axis starts
+        end -- The real number at which the x-axis ends
+        step -- A real number for the fineness of the plot (defaults to 0.01)
+        """
+        Process(target=self._plot, args=(start, end, step)).start()
+
+    def _plot(self, start, end, step):
+        """Plot this function from "start" to "end" with step size "step".
+
+        Keyword arguments:
+        start -- The real number at which the x-axis starts
+        end -- The real number at which the x-axis ends
+        step -- A real number for the fineness of the plot (defaults to 0.01)
+        """
+        domain = []
+        curr = start
+        while curr < end:
+            domain.append(curr)
+            curr += step
+        domain.append(end)
+        f_evals = [self.eval(x) for x in domain if not math.isnan(self.eval(x))]
+        plt.plot(domain, f_evals)
+        plt.show()
 
 
 # Constants in this module
