@@ -65,3 +65,18 @@ def test_negation():
     """Tests the negation of functions."""
     f = -functions.exp
     assert f.eval(0) == -1
+
+def test_pow():
+    """Tests the exponentiation of functions"""
+    f = functions.exp ** functions.sin
+    assert isinstance(f, functions.Function)
+    f = functions.exp ** functions.log
+    assert f.eval(1) == 1
+    f = (functions.exp ** 2) ** functions.log
+    assert f.eval(2) == 16
+    f = 3 ** functions.sin
+    assert f.eval(0) == 1
+
+def test_derivative():
+    """Tests the derivative of functions"""
+    

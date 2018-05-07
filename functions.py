@@ -49,7 +49,7 @@ class Function:
         return Function(func)
 
     def __pos__(self):
-        """Returns itself."""
+        """Return self."""
         return self
 
     def __add__(self, func_or_num):
@@ -80,7 +80,7 @@ class Function:
         return self.__add__(func_or_num)
 
     def __sub__(self, func_or_num):
-        """Returns an instance of this class whose eval method returns self.eval - func_or_num.
+        """Return an instance of this class whose eval method returns self.eval - func_or_num.
 
         Keyword arguments:
         func_or_num -- An instance of this class OR a real number.
@@ -104,11 +104,11 @@ class Function:
 
     def __rsub__(self, func_or_num):
         """Does func_or_num - self"""
-        f = -self
-        return f.__add__(func_or_num)
+        negated = -self
+        return negated.__add__(func_or_num)
 
     def __mul__(self, func_or_num):
-        """Returns an instance of this class whose eval method is self.eval * func_or_num.
+        """Return an instance of this class whose eval method is self.eval * func_or_num.
 
         Keyword arguments:
         func_or_num -- An instance of this class OR a real number.
@@ -135,7 +135,7 @@ class Function:
         return self.__mul__(func_or_num)
 
     def __truediv__(self, func_or_num):
-        """Returns an instance of this class whose eval method is self.eval / func_or_num.
+        """Return an instance of this class whose eval method is self.eval / func_or_num.
 
         Keyword arguments:
         func_or_num -- An instance of this class OR a real number.
@@ -172,8 +172,67 @@ class Function:
             if val == 0:
                 return float("nan")
             return 1/val
-        f = Function(inverse)
-        return f.__mul__(func_or_num)
+        inversed = Function(inverse)
+        return inversed.__mul__(func_or_num)
+
+    def __pow__(self, func_or_num):
+        """Return an instance of this class whose eval method is self.eval^func_or_num.
+
+        Keyword arguments:
+        func_or_num -- An instance of this class OR a real number.
+
+        Example: exp^sin, would return a Function that evaluates to (e^x)^sin(x).
+        """
+        if isinstance(func_or_num, Function):
+            def power(arg):
+                return self.eval(arg) ** func_or_num.eval(arg)
+
+        elif isinstance(func_or_num, Number):
+            def power(arg):
+                return self.eval(arg) ** func_or_num
+
+        else:
+            raise TypeError("unsupported operand type for **.\
+            Functions can only be raised by a real number or\
+            another function.")
+
+        return Function(power)
+
+    def __rpow__(self, func_or_num):
+        """Rewrite func_or_num^self as (e^self)^log(func_or_num)"""
+        ln_func_or_num = Function(math.log)(func_or_num)
+        exp_self = Function(math.exp)(self)
+        return exp_self.__pow__(ln_func_or_num)
+
+
+    def derivative(self, dx=0.001):
+        """Return a new instance of Function that evaluates to the derivative of this function in each point.
+
+        Keyword arguments:
+        dx -- a real number that determines the step in the two point difference method for calculating derivatives (defaults to 0.001).
+        """
+        def deriv(arg, h):
+            if math.isnan(self.eval(arg)):
+                # Cannot calculate derivative in this point
+                return float("nan")
+
+            f_posh = self.eval(arg+h)
+            f_negh = self.eval(arg-h)
+
+            # Defaults to the one point difference method if either of the points is nan since we happened to come across a singularity
+            if math.isnan(f_posh):
+                f_posh = self.eval(arg)
+                h = h/2
+            elif math.isnan(f_negh):
+                f_negh = self.eval(arg)
+                h = h/2
+            
+            df = f_posh - f_negh
+            return df/(2*h)
+
+        return Function(lambda arg: deriv(arg,dx))
+
+
 
 
 # Constants in this module
