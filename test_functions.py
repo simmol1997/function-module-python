@@ -90,3 +90,19 @@ def test_derivative():
     f = 1/functions.x
     assert math.isclose(fd(3), f(3), rel_tol=1e-7)
     assert math.isclose(fd(43), f(43), rel_tol=1e-7)
+
+def test_integral():
+    """Tests the integral of functions"""
+    f = functions.sin
+    assert math.isclose(f.integral(0, math.pi), 2, rel_tol=1e-10)
+    assert math.isclose(f.integral(0, math.pi*2), 0, abs_tol=1e-10)
+    f = functions.x
+    assert math.isclose(f.integral(0, 2), 2, rel_tol=1e-10)
+    f = 1/functions.x
+    assert math.isclose(f.integral(1, math.e), 1, rel_tol=1e-10)
+    f = 1/(functions.x**0.5)
+    # Since this is a generalized integral we cannot have the same tolerance
+    assert math.isclose(f.integral(0, 1), 2, rel_tol=1e-1)
+    f = 1/((functions.x**2)**(1/3))
+    # Again this is a generalized integral
+    assert math.isclose(f.integral(0, 1), 3, rel_tol=1e-1)

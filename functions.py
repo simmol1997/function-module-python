@@ -1,11 +1,11 @@
 """This module provides basic manipulation of mathematical functions."""
 
+import math
+from numbers import Number #Used only for checking isinstance(n, Number)
+
 __all__ = []
 __version__ = "1.0"
 __author__ = "simmol"
-
-import math
-from numbers import Number #Used only for checking isinstance(n, Number)
 
 class Function:
     """Class for creating and handling mathematical functions."""
@@ -230,13 +230,56 @@ class Function:
                 h = h/2
             elif math.isnan(f_negh):
                 f_negh = self.eval(arg)
-                h = h/2          
+                h = h/2
             df = f_posh - f_negh
             return df/(2*h)
 
         return Function(lambda arg: deriv(arg, dx))
 
+    def integral(self, start, end, init_step=0.0001):
+        """Return the definite integral from start to end of this function.
 
+        Keyword arguments:
+        start -- A real number being the startingpoint of the integral.
+        end -- A real number being the endpoint of the integral.
+        init_step -- The initial value of the interval size.
+
+        The algorithm uses a version of Simpson's 3/8 rule where the step size is
+        decreased and increased based on the functions derivative.
+        (https://en.wikipedia.org/wiki/Simpson%27s_rule#Simpson's_3/8_rule)
+        """
+        # The following ensures that the step size is at least 1/10 of the interval
+        # and that if end is less than start we backtrack instead of moving forward.
+        init_step = math.copysign(min(init_step, (end-start)/10), end-start)
+        f = self # Makes it more readable later
+
+        # The step size in the derivative must be smaller than in the integral
+        # in case of the integral being generalized.
+        deriv = f.derivative(dx=init_step/2)
+        # h is the "local" step size and depends on the derivative and init_step
+        h = init_step
+
+        # If either endpoint is a singularity it is a generalized integral
+        if math.isnan(self.eval(start)):
+            start += init_step
+        if math.isnan(self.eval(end)):
+            end -= init_step
+
+        x_i = start
+        acc_int = 0 # Accumulates the value of the integral
+
+        while x_i + init_step < end:
+            # local_step is determined by the magnitude of the derivative
+            h = min(abs(1/(10*deriv.eval(x_i))), abs(init_step))
+            # Calculates the integral from x_i to x_i+h using Simpson's 3/8 rule
+            acc_int += (h/8)*(f(x_i) + 3*f((3*x_i + h)/3) + 3*f((3*x_i + 2*h)/3) + f(x_i + h))
+            x_i += h
+
+        # There is one interval left from x_i to end
+        h = end - x_i
+        acc_int += (h/8)*(f(x_i) + 3*f((3*x_i + h)/3) + 3*f((3*x_i + 2*h)/3) + f(x_i + h))
+
+        return acc_int
 
 
 # Constants in this module
