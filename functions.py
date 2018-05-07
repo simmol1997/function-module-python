@@ -18,7 +18,18 @@ class Function:
         func -- A function that takes a number as input and outputs another
                 number according to some rule.
         """
-        self.eval = func
+        self._function = func
+
+    def eval(self, num):
+        """Return the evaluation of the function in the point "num"
+
+        Keyword arguments:
+        num -- A real number in the domain of the function
+        """
+        # This method is only here for the docstring otherwise it would be defined
+        # in __init__ as self.eval = func and the user would have no clue as
+        # to what eval actually does (except for the descriptive name of course).
+        return self._function(num)
 
     def __call__(self, func_or_num):
         """If func_or_num is a real number return self.eval(func_or_num).
