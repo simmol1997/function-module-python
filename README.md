@@ -29,10 +29,10 @@ f.integral(0,100)
 ### *class* functions.**Function**(function: f)
 Here f is a pure function defined as usual by **def** that takes one number as input and outputs another number (or NaN if undefined in a point) according to some rule.
 
-The Function class is the base of all mathematical functions. All instances can be conjugated with numbers and or other Function instances by the common operators +, -, \*, / and \*\* to produce new instances of the Function class. Every instance of this class is also considered to be callable and f(2) for some instance f of Function would produce the same result as f.eval(2) (see the eval method documentation below).
+The Function class is the base of all mathematical functions. All instances can be conjugated with numbers and/or other Function instances by the common operators +, -, \*, / and \*\* to produce new instances of the Function class. Every instance of this class is also considered to be callable and f(2) for some instance f of Function would produce the same result as f.eval(2) (see the eval method documentation below).
 
 #### *method* **eval**(Number: x)
-Return the evaluation of this function instance is the point x.
+Return the evaluation of this function instance at the point x.
 
 #### *method* **derivative**(*dx*=0.0001)
 Return a new instance of the class Function that evaluates to the derivative of this function in each point (an optional argument for the step size in the calculation of the derivative is provided).
@@ -75,3 +75,12 @@ A Function instance relating to the identity function (can also be used for clar
 
 #### functions.**sqrt**
 A Function instance relating to the square root of x function.
+
+## Compatibility Policy
+
+* The API of this module is frozen.
+* Version numbers adhere to semantic versioning.
+
+The only accepted reason to modify the API of this module
+is to handle issues that cannot be resolved in any other
+reasonable way.
