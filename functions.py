@@ -267,50 +267,48 @@ class Function:
 
         return Function(lambda arg: deriv(arg, dx))
 
-    def integral(self, start, end, init_step=0.0001):
+    def integral(self, start, end, tol=1e-5):
         """Return the definite integral from start to end of this function.
 
         Keyword arguments:
         start -- A real number being the startingpoint of the integral.
         end -- A real number being the endpoint of the integral.
-        init_step -- The initial value of the interval size (defaults to 1e-4).
+        tol -- The the accepted tolerance of the evaluation (defaults to 1e-5).
 
-        The algorithm uses a version of Simpson's 3/8 rule where the step size is
-        decreased and increased based on the functions derivative.
-        (https://en.wikipedia.org/wiki/Simpson%27s_rule#Simpson's_3/8_rule)
+        For generalized integrals the tolerance turns out to be about 1/3
+        of the provided tolerance.
+        The algorithm uses a version of Simpson's 3/8 rule.
+        https://en.wikipedia.org/wiki/Simpson%27s_rule#Simpson's_3/8_rule
+        https://en.wikipedia.org/wiki/Adaptive_Simpson%27s_method
         """
-        # The following ensures that the step size is at least 1/10 of the interval
-        # and that if end is less than start we backtrack instead of moving forward.
-        init_step = math.copysign(min(init_step, (end-start)/10), end-start)
-        f = self # Makes it more readable later
-
-        # The step size in the derivative must be smaller than in the integral
-        # in case of the integral being generalized.
-        deriv = f.derivative(dx=init_step/2)
-        # h is the "local" step size and depends on the derivative and init_step
-        h = init_step
-
         # If either endpoint is a singularity it is a generalized integral
         if math.isnan(self.eval(start)):
-            start += init_step
+            start += tol
         if math.isnan(self.eval(end)):
-            end -= init_step
+            end -= tol
 
-        x_i = start
-        acc_int = 0 # Accumulates the value of the integral
+        midpoint = (start + end)/2
+        left = self._simpsons_rule(start, midpoint)
+        right = self._simpsons_rule(midpoint, end)
+        whole = self._simpsons_rule(start, end)
 
-        while x_i + init_step < end:
-            # local_step is determined by the magnitude of the derivative
-            h = min(abs(1/(10*deriv.eval(x_i))), abs(init_step))
-            # Calculates the integral from x_i to x_i+h using Simpson's 3/8 rule
-            acc_int += (h/8)*(f(x_i) + 3*f((3*x_i + h)/3) + 3*f((3*x_i + 2*h)/3) + f(x_i + h))
-            x_i += h
+        if abs(left + right - whole) < 15*tol:
+            return left + right + (left + right - whole)/15
+        return self.integral(start, midpoint, tol) + self.integral(midpoint, end, tol)
 
-        # There is one interval left from x_i to end
-        h = end - x_i
-        acc_int += (h/8)*(f(x_i) + 3*f((3*x_i + h)/3) + 3*f((3*x_i + 2*h)/3) + f(x_i + h))
+    def _simpsons_rule(self, start, end):
+        """Return the calculation of simpson's 3/8 rule on the interval from start
+        to end with this function.
 
-        return acc_int
+        Keyword arguments:
+        start -- A real number being the startingpoint of the integral.
+        end -- A real number being the endpoint of the integral.
+        """
+        return ((end - start)/8
+                * (self.eval(start)
+                + 3*self.eval((2*start + end)/3)
+                + 3*self.eval((start  + 2*end)/3)
+                + self.eval(end)))
 
     def plot(self, start, end, step=0.01):
         """Start a new process that shows the plot of the function from start to end.
