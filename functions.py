@@ -326,7 +326,16 @@ class Function:
 
 # Constants in this module
 exp = Function(math.exp)
-log = Function(math.log)
+def _log(num):
+    """Return ln(num) if num > 0 otherwise return nan.
+
+    Keyword arguments:
+    num -- A real number
+    """
+    if num <= 0:
+        return float("nan")
+    return math.log(num)
+log = Function(_log)
 sin = Function(math.sin)
 arcsin = Function(math.asin)
 cos = Function(math.cos)
