@@ -24,7 +24,7 @@ Evaluate the generalized integral of 1/(sqrt(x)) from 0 to 100.
 ```python
 from functions import *
 f = 1/(sqrt(x))
-f.integral(0,100)
+f.integral(0,100) # --> 20.00009
 ```
 ### *class* functions.**Function**(function: f)
 Here f is a pure function defined as usual by **def** that takes one number as input and outputs another number (or NaN if undefined in a point) according to some rule.
