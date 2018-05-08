@@ -38,7 +38,7 @@ Return the evaluation of this function instance at the point x.
 Return a new instance of the class Function that evaluates to the derivative of this function in each point (an optional argument for the step size in the calculation of the derivative is provided).
 
 #### *method* **integral**(Number: start, Number: end, *tol*=1e-5)
-Return the evaluation of the definite integral from start to end of this function with a tolerance of tol in the error (defaults to 1e-5). For generalized integrals such as the integral from 0 to 1 of 1/(x^(2/3)) the tolerance becomes about 1/3 of the provided.
+Return the evaluation of the definite integral from start to end of this function with a tolerance of tol in the error (defaults to 1e-5). For generalized integrals such as the integral from 0 to 1 of 1/(x^(2/3)) one cannot expect the tolerance to be as well although it should still be respectable.
 
 #### *method* **plot**(Number: start, Number: end, *step*=0.01)
 Start a new process that shows the plot of the function from start to end with the step size of step (defaults to 0.01). This does not in any way disrupt the flow of the program, instead it starts a new process that runs independently of the program it is started from.

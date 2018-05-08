@@ -275,17 +275,15 @@ class Function:
         end -- A real number being the endpoint of the integral.
         tol -- The the accepted tolerance of the evaluation (defaults to 1e-5).
 
-        For generalized integrals the tolerance turns out to be about 1/3
-        of the provided tolerance.
         The algorithm uses a version of Simpson's 3/8 rule.
         https://en.wikipedia.org/wiki/Simpson%27s_rule#Simpson's_3/8_rule
         https://en.wikipedia.org/wiki/Adaptive_Simpson%27s_method
         """
         # If either endpoint is a singularity it is a generalized integral
         if math.isnan(self.eval(start)):
-            start += tol
+            start += tol**3 # Ensures the tolerance is met
         if math.isnan(self.eval(end)):
-            end -= tol
+            end -= tol**3
 
         midpoint = (start + end)/2
         left = self._simpsons_rule(start, midpoint)
