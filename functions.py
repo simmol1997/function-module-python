@@ -246,7 +246,7 @@ class Function:
 
         Using the two point differential method ensures that the result is as close as O(dx^2).
         """
-        def deriv(arg, h):
+        def deriv(arg, h=dx):
             if math.isnan(self.eval(arg)):
                 # Cannot calculate derivative in this point
                 return float("nan")
@@ -265,7 +265,7 @@ class Function:
             df = f_posh - f_negh
             return df/(2*h)
 
-        return Function(lambda arg: deriv(arg, dx))
+        return Function(deriv)
 
     def integral(self, start, end, tol=1e-5):
         """Return the definite integral from start to end of this function.
