@@ -1,4 +1,18 @@
-"""This module provides basic manipulation of mathematical functions."""
+"""This module provides basic manipulation of mathematical functions.
+
+Exported objects:
+Function -- The base class for mathematical functions.
+exp -- A Function instance relating to the exponential function.
+sin -- A Function instance relating to the sine function.
+arcsin -- A Function instance relating to the inverse sine function.
+cos -- A Function instance relating to the cosine function.
+arccos -- A Function instance relating to the inverse cosine function.
+tan -- A Function instance relating to the tan function.
+arctan -- A Function instance relating to the inverse tan function.
+log -- A Function instance relating to the logarithmic function.
+x -- A Function instance relating to the identity or (variable x) function.
+sqrt -- A Function instance relating to the square root of x function.
+"""
 
 import math
 from numbers import Number # Used only for checking isinstance(n, Number)
@@ -6,7 +20,10 @@ from multiprocessing import Process # Used by the plot method in the Function cl
 
 import matplotlib.pyplot as plt
 
-__all__ = []
+__all__ = [
+    'Function', 'exp', 'sin', 'arcsin', 'cos',
+    'arccos', 'tan', 'arctan', 'log', 'x', 'sqrt'
+    ]
 __version__ = "1.0"
 __author__ = "simmol"
 
