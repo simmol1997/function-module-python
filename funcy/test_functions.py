@@ -1,6 +1,6 @@
 """Unittests for the functions module."""
 
-import functions
+from funcy import functions
 import math
 
 def test_eval():
@@ -66,6 +66,15 @@ def test_negation():
     f = -functions.exp
     assert f.eval(0) == -1
 
+def test_abs():
+    """Tests that the absolute value of functions works."""
+    f = abs(functions.x)
+    assert isinstance(f, functions.Function)
+    assert f.eval(-5) == 5
+    f = abs(functions.sin)
+    for i in range(100):
+        assert f.eval(i) >= 0
+
 def test_pow():
     """Tests the exponentiation of functions"""
     f = functions.exp ** functions.sin
@@ -90,6 +99,12 @@ def test_derivative():
     f = 1/functions.x
     assert math.isclose(fd(3), f(3), rel_tol=1e-7)
     assert math.isclose(fd(43), f(43), rel_tol=1e-7)
+    # Tests that the behaviour of the derivative is not broken in weird points.
+    f = abs(functions.x).derivative()
+    # Should be 0 since the algorithm takes point on equal distances around the point
+    assert f.eval(0) == 0
+    f = abs(functions.sin).derivative()
+    assert f.eval(0) == 0
 
 def test_integral():
     """Tests the integral of functions"""

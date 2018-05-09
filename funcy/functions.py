@@ -57,7 +57,7 @@ class Function:
         instance whose eval returns self.eval(func_or_num(x)) for any input x.
 
         Keyword arguments:
-        func_or_num -- An instance of this class OR a real number.
+        func_or_num -- An instance of Function OR a real number.
 
         Examples:   exp(sin), would return a new Function that evaluates according to e^(sin(x)).
                     exp(3), would return the same thing as exp.eval(3)
@@ -83,21 +83,25 @@ class Function:
         """Return self."""
         return self
 
+    def __abs__(self):
+        """Return an instance of Function that evaluates as |self.eval| i.e. abs(self.eval)"""
+        return Function(lambda num: abs(self.eval(num)))
+
     def __add__(self, func_or_num):
-        """Return an instance of this class whose eval method returns self.eval + func_or_num.
+        """Return an instance of Function whose eval method returns self.eval + func_or_num.
 
         Keyword arguments:
-        func_or_num -- An instance of this class OR a real number.
+        func_or_num -- An instance of Function OR a real number.
 
         Example: exp + sin, would return a new Function that evaluates according to e^x + sin(x).
         """
         if isinstance(func_or_num, Function):
-            def added(arg):
-                return self.eval(arg) + func_or_num.eval(arg)
+            def added(num):
+                return self.eval(num) + func_or_num.eval(num)
 
         elif isinstance(func_or_num, Number):
-            def added(arg):
-                return self.eval(arg) + func_or_num
+            def added(num):
+                return self.eval(num) + func_or_num
 
         else:
             raise TypeError("unsupported operand type for +.\
@@ -111,20 +115,20 @@ class Function:
         return self.__add__(func_or_num)
 
     def __sub__(self, func_or_num):
-        """Return an instance of this class whose eval method returns self.eval - func_or_num.
+        """Return an instance of Function whose eval method returns self.eval - func_or_num.
 
         Keyword arguments:
-        func_or_num -- An instance of this class OR a real number.
+        func_or_num -- An instance of Function OR a real number.
 
         Example: exp - sin, would return a Function that evaluates to e^x - sin(x).
         """
         if isinstance(func_or_num, Function):
-            def subtracted(arg):
-                return self.eval(arg) - func_or_num.eval(arg)
+            def subtracted(num):
+                return self.eval(num) - func_or_num.eval(num)
 
         elif isinstance(func_or_num, Number):
-            def subtracted(arg):
-                return self.eval(arg) - func_or_num
+            def subtracted(num):
+                return self.eval(num) - func_or_num
 
         else:
             raise TypeError("unsupported operand type for -.\
@@ -139,20 +143,20 @@ class Function:
         return negated.__add__(func_or_num)
 
     def __mul__(self, func_or_num):
-        """Return an instance of this class whose eval method is self.eval * func_or_num.
+        """Return an instance of Function whose eval method is self.eval * func_or_num.
 
         Keyword arguments:
-        func_or_num -- An instance of this class OR a real number.
+        func_or_num -- An instance of Function OR a real number.
 
         Example: exp * sin, would return a Function that evaluates to e^x * sin(x).
         """
         if isinstance(func_or_num, Function):
-            def multiplied(arg):
-                return self.eval(arg) * func_or_num.eval(arg)
+            def multiplied(num):
+                return self.eval(num) * func_or_num.eval(num)
 
         elif isinstance(func_or_num, Number):
-            def multiplied(arg):
-                return self.eval(arg) * func_or_num
+            def multiplied(num):
+                return self.eval(num) * func_or_num
 
         else:
             raise TypeError("unsupported operand type for *.\
@@ -166,28 +170,28 @@ class Function:
         return self.__mul__(func_or_num)
 
     def __truediv__(self, func_or_num):
-        """Return an instance of this class whose eval method is self.eval / func_or_num.
+        """Return an instance of Function whose eval method is self.eval / func_or_num.
 
         Keyword arguments:
-        func_or_num -- An instance of this class OR a real number.
+        func_or_num -- An instance of Function OR a real number.
 
         Example: exp / sin, would return a Function that evaluates to e^x / sin(x).
         """
         # Here special consideration is needed in order to
         # handle cases where func_or_num evaluates to 0
         if isinstance(func_or_num, Function):
-            def divided(arg):
-                if func_or_num.eval(arg) == 0:
+            def divided(num):
+                if func_or_num.eval(num) == 0:
                     return float("nan")
-                return self.eval(arg) / func_or_num.eval(arg)
+                return self.eval(num) / func_or_num.eval(num)
 
         elif isinstance(func_or_num, Number):
             if func_or_num == 0:
-                def divided(arg):
+                def divided(num):
                     return float("nan")
             else:
-                def divided(arg):
-                    return self.eval(arg) / func_or_num
+                def divided(num):
+                    return self.eval(num) / func_or_num
 
         else:
             raise TypeError("unsupported operand type for /.\
@@ -198,8 +202,8 @@ class Function:
 
     def __rtruediv__(self, func_or_num):
         """Does (1/self) * func_or_num instead"""
-        def inverse(arg):
-            val = self.eval(arg)
+        def inverse(num):
+            val = self.eval(num)
             if val == 0:
                 return float("nan")
             return 1/val
@@ -207,20 +211,20 @@ class Function:
         return inversed.__mul__(func_or_num)
 
     def __pow__(self, func_or_num):
-        """Return an instance of this class whose eval method is self.eval^func_or_num.
+        """Return an instance of Function whose eval method is self.eval^func_or_num.
 
         Keyword arguments:
-        func_or_num -- An instance of this class OR a real number.
+        func_or_num -- An instance of Function OR a real number.
 
         Example: exp^sin, would return a Function that evaluates to (e^x)^sin(x).
         """
         if isinstance(func_or_num, Function):
-            def power(arg):
-                return self.eval(arg) ** func_or_num.eval(arg)
+            def power(num):
+                return self.eval(num) ** func_or_num.eval(num)
 
         elif isinstance(func_or_num, Number):
-            def power(arg):
-                return self.eval(arg) ** func_or_num
+            def power(num):
+                return self.eval(num) ** func_or_num
 
         else:
             raise TypeError("unsupported operand type for **.\
@@ -246,21 +250,21 @@ class Function:
 
         Using the two point differential method ensures that the result is as close as O(dx^2).
         """
-        def deriv(arg, h=dx):
-            if math.isnan(self.eval(arg)):
+        def deriv(num, h=dx):
+            if math.isnan(self.eval(num)):
                 # Cannot calculate derivative in this point
                 return float("nan")
 
-            f_posh = self.eval(arg+h)
-            f_negh = self.eval(arg-h)
+            f_posh = self.eval(num+h)
+            f_negh = self.eval(num-h)
 
             # Defaults to the one point difference method if either of the points is
             # nan. This means we happened to come across a singularity.
             if math.isnan(f_posh):
-                f_posh = self.eval(arg)
+                f_posh = self.eval(num)
                 h = h/2
             elif math.isnan(f_negh):
-                f_negh = self.eval(arg)
+                f_negh = self.eval(num)
                 h = h/2
             df = f_posh - f_negh
             return df/(2*h)
@@ -356,4 +360,4 @@ arccos = Function(math.acos)
 tan = Function(math.tan)
 arctan = Function(math.atan)
 sqrt = Function(math.sqrt)
-x = Function(lambda arg: arg) # Identity function
+x = Function(lambda num: num) # Identity function
