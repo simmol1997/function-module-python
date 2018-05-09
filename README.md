@@ -29,7 +29,7 @@ f.integral(0,100) # --> 20.00009
 ### *class* functions.**Function**(function: f)
 Here f is a pure function defined as usual by **def** that takes one number as input and outputs another number (or NaN if undefined in a point) according to some rule.
 
-The Function class is the base of all mathematical functions. All instances can be conjugated with numbers and/or other Function instances by the common operators +, -, \*, / and \*\* to produce new instances of the Function class. Every instance of this class is also considered to be callable and f(2) for some instance f of Function would produce the same result as f.eval(2) (see the eval method documentation below).
+The Function class is the base of all mathematical functions. All instances can be conjugated with numbers and/or other Function instances by the common operators +, -, \*, / and \*\* to produce new instances of the Function class. Every instance of this class is also considered to be callable and f(2) for some instance f of Function would produce the same result as f.eval(2) (see the eval method documentation below). Each instance, f, returns a new Function instance that evaluates as abs(f.eval) or |f(x)| when acted on by the "abs" builtin function.
 
 #### *method* **eval**(Number: x)
 Return the evaluation of this function instance at the point x.
