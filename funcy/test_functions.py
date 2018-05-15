@@ -93,12 +93,12 @@ def test_derivative():
     assert isinstance(fd, functions.Function)
     # The two point numerical method for differentiation ensures that f'(x) = f.derivative(x) + O(dx^2).
     # Since dx^2 is 1e-8 we know that the result is at least 1e-7 close.
-    assert math.isclose(fd(0), f(0), rel_tol=1e-7)
-    assert math.isclose(fd(3), f(3), rel_tol=1e-7)
+    assert math.isclose(fd(0), f(0), abs_tol=1e-7)
+    assert math.isclose(fd(3), f(3), abs_tol=1e-7)
     fd = functions.log.derivative()
     f = 1/functions.x
-    assert math.isclose(fd(3), f(3), rel_tol=1e-7)
-    assert math.isclose(fd(43), f(43), rel_tol=1e-7)
+    assert math.isclose(fd(3), f(3), abs_tol=1e-7)
+    assert math.isclose(fd(43), f(43), abs_tol=1e-7)
     # Tests that the behaviour of the derivative is not broken in weird points.
     f = abs(functions.x).derivative()
     # Should be 0 since the algorithm takes point on equal distances around the point
@@ -106,18 +106,41 @@ def test_derivative():
     f = abs(functions.sin).derivative()
     assert f.eval(0) == 0
 
-def test_integral():
+def test_integrate():
     """Tests the integral of functions"""
     f = functions.sin
-    assert math.isclose(f.integral(0, math.pi, tol=1e-10), 2, rel_tol=1e-10)
-    assert math.isclose(f.integral(0, math.pi*2, tol=1e-10), 0, abs_tol=1e-10)
+    assert math.isclose(f.integrate(0, math.pi, tol=1e-10), 2, abs_tol=1e-10)
+    assert math.isclose(f.integrate(0, math.pi*2, tol=1e-10), 0, abs_tol=1e-10)
     f = functions.x
-    assert math.isclose(f.integral(0, 2, tol=1e-10), 2, rel_tol=1e-10)
+    assert math.isclose(f.integrate(0, 2, tol=1e-10), 2, abs_tol=1e-10)
     f = 1/functions.x
-    assert math.isclose(f.integral(1, math.e, tol=1e-10), 1, rel_tol=1e-10)
+    assert math.isclose(f.integrate(1, math.e, tol=1e-10), 1, abs_tol=1e-10)
+    # Generalized integrals tested below
     f = 1/(functions.x**0.5)
-    # Since this is a generalized integral we cannot have the same tolerance
-    assert math.isclose(f.integral(0, 1, tol=1e-10), 2, rel_tol=1e-3)
+    assert math.isclose(f.integrate(0, 1, tol=1e-10), 2, abs_tol=1e-10)
     f = 1/((functions.x**2)**(1/3))
-    # Again this is a generalized integral
-    assert math.isclose(f.integral(0, 1, tol=1e-10), 3, rel_tol=1e-3)
+    assert math.isclose(f.integrate(0, 1, tol=1e-10), 3, abs_tol=1e-10)
+    # Test some divergent integrals
+    f = 1/(functions.x**2)
+    assert math.isnan(f.integrate(0,1))
+    f = 1/(functions.x - 1)**2
+    assert math.isnan(f.integrate(0,2))
+
+def test_norm():
+    """Tests the norm function in the functions module."""
+    assert math.isnan(functions.norm(functions.exp))
+    assert math.isnan(functions.norm(functions.sin))
+    assert math.isnan(functions.norm(functions.tan))
+    assert math.isnan(functions.norm(functions.x))
+    f = functions.exp(-functions.x**2)
+    norm = math.sqrt(math.sqrt(math.pi/2))
+    assert math.isclose(functions.norm(f, tol=1e-5), norm, abs_tol=1e-5)
+    norm = math.sqrt(math.pi)
+    assert math.isclose(functions.norm(f, norm_type="L1", tol=1e-5), norm, abs_tol=1e-5)
+    f = f * functions.sin
+    norm = math.sqrt(1/4 * (math.sqrt(2*math.pi) - math.sqrt(2*math.pi/math.e)))
+    assert math.isclose(functions.norm(f, tol=1e-5), norm, abs_tol=1e-5)
+    f = 1/functions.x
+    assert math.isnan(functions.norm(f))
+    f = f**2
+    assert math.isnan(functions.norm(f))

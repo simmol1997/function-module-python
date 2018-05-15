@@ -2,6 +2,7 @@
 
 Exported objects:
 Function -- The base class for mathematical functions.
+norm -- a function that calculates the norm of any Function instance.
 exp -- A Function instance relating to the exponential function.
 sin -- A Function instance relating to the sine function.
 arcsin -- A Function instance relating to the inverse sine function.
@@ -41,7 +42,7 @@ class Function:
         self._function = func
 
     def eval(self, num):
-        """Return the evaluation of the function in the point "num"
+        """Return the evaluation of the function in the point num
 
         Keyword arguments:
         num -- A real number in the domain of the function
@@ -239,7 +240,6 @@ class Function:
         exp_self = Function(math.exp)(self)
         return exp_self.__pow__(ln_func_or_num)
 
-
     def derivative(self, dx=0.0001):
         """Return a new instance of Function that evaluates to the derivative of this
         function in each point.
@@ -271,32 +271,46 @@ class Function:
 
         return Function(deriv)
 
-    def integral(self, start, end, tol=1e-5):
-        """Return the definite integral from start to end of this function.
+    def integrate(self, start, end, tol=1e-5, MAX=1e10):
+        """Return the definite integral from start to end of this function if it exists.
+        Return NaN otherwise.
 
         Keyword arguments:
         start -- A real number being the startingpoint of the integral.
         end -- A real number being the endpoint of the integral.
-        tol -- The the accepted tolerance of the evaluation (defaults to 1e-5).
+        tol -- The accepted tolerance of the evaluation (defaults to 1e-5).
+        MAX --  The maximum value the integral can evaluate to (defaults to 1e10).
+                Is used to prevent diverging integrals from hogging resources.
 
         The algorithm uses a version of Simpson's 3/8 rule.
         https://en.wikipedia.org/wiki/Simpson%27s_rule#Simpson's_3/8_rule
         https://en.wikipedia.org/wiki/Adaptive_Simpson%27s_method
         """
-        # If either endpoint is a singularity it is a generalized integral
-        if math.isnan(self.eval(start)):
-            start += tol**3 # Ensures the tolerance is met
-        if math.isnan(self.eval(end)):
-            end -= tol**3
+        intervals_to_integrate = [(start, end)]
+        acc_int = 0 # Accumulates the value of the integral
 
-        midpoint = (start + end)/2
-        left = self._simpsons_rule(start, midpoint)
-        right = self._simpsons_rule(midpoint, end)
-        whole = self._simpsons_rule(start, end)
+        while intervals_to_integrate:
+            if acc_int > MAX:
+                return float("nan")
 
-        if abs(left + right - whole) < 15*tol:
-            return left + right + (left + right - whole)/15
-        return self.integral(start, midpoint, tol) + self.integral(midpoint, end, tol)
+            start, end = intervals_to_integrate.pop()
+            # If either endpoint is a singularity it is a generalized integral
+            if math.isnan(self.eval(start)):
+                start += tol**3 # Ensures the tolerance is met
+            if math.isnan(self.eval(end)):
+                end -= tol**3
+
+            midpoint = (start + end)/2
+            left = self._simpsons_rule(start, midpoint)
+            right = self._simpsons_rule(midpoint, end)
+            whole = self._simpsons_rule(start, end)
+
+            if abs(left + right - whole) <= 15*tol:
+                acc_int += left + right + (left + right - whole)/15
+            else:
+                # If the tolerance is not met we divide the interval again
+                intervals_to_integrate.extend([(start, midpoint), (midpoint, end)])
+        return acc_int
 
     def _simpsons_rule(self, start, end):
         """Return the calculation of simpson's 3/8 rule on the interval from start
@@ -328,7 +342,29 @@ class Function:
         Keyword arguments:
         start -- The real number at which the x-axis starts
         end -- The real number at which the x-axis ends
-        step -- A real number for the fineness of the plot (defaults to 0.01)
+        step -- A real number for the fineness of the plot
+        """
+        grid = self._get_eval_grid(start, end, step)
+        grid = zip(*grid)
+        # Removes singularities
+        grid = [point for point in grid if not math.isnan(point[1])]
+        domain, f_evals = zip(*grid)
+        domain, f_evals = list(domain), list(f_evals)
+        plt.plot(domain, f_evals)
+        plt.show()
+
+    def _get_eval_grid(self, start, end, step):
+        """Return a tuple containing two list, the first being the evaluation points
+        (or the domain) and the second being the functions evaluation in those points
+        (or the codomain).
+
+        Keyword arguments:
+        start -- The real number at which the domain starts
+        end -- The real number at which the domain ends
+        step -- A real number for the fineness of the domain points.
+
+        Obs! The functions evaluation includes points where the function is not defined
+        so some points may be NaN.
         """
         domain = []
         curr = start
@@ -336,12 +372,53 @@ class Function:
             domain.append(curr)
             curr += step
         domain.append(end)
-        f_evals = [self.eval(x) for x in domain if not math.isnan(self.eval(x))]
-        plt.plot(domain, f_evals)
-        plt.show()
+        f_evals = [self.eval(x) for x in domain]
+        return (domain, f_evals)
 
 
-# Constants in this module
+def norm(func: Function, norm_type="L2", tol=1e-5):
+    """Return the norm of the provided function if it exists otherwise return NaN.
+
+    Keyword arguments:
+    func -- A Function instance to calculate the norm on.
+    norm_type -- The norm to use in the calculation (defaults to "L2"). Supported norm types
+            include: "L1", "L2", "L3", ..., "Lp" for all integers p. These being the
+            standard norms in L_p spaces.
+    tol -- The accepted tolerance of the evaluation (defaults to 1e-5).
+
+    For information about norm types see: https://en.wikipedia.org/wiki/Lp_space#Lp_spaces
+    """
+    if norm_type[0] == "L":
+        try:
+            norm_type = int(norm_type[1:])
+        except ValueError:
+            raise ValueError("Must input a valid norm type. See Documentation or do: help(norm)")
+
+        func_to_integrate = abs(func)**norm_type
+        # If the function does not approach 0 in ±infinity the integral diverges
+        try:
+            # Can throw OverflowError if the function diverges
+            cond1 = abs(func_to_integrate.eval(1e5)) >= abs(func_to_integrate.eval(1e6))
+            cond2 = abs(func_to_integrate.eval(-1e5)) >= abs(func_to_integrate.eval(-1e6))
+
+            # This is the value of 1/x which is the "smallest" function not to converge
+            cond3 = abs(func_to_integrate.eval(1e5)) < 1e-5
+            cond4 = abs(func_to_integrate.eval(-1e5)) < 1e-5
+            integrable = cond1 and cond2 and cond3 and cond4
+
+        except OverflowError:
+            integrable = False
+
+        if not integrable:
+            return float("nan")
+        # Change variables so that the interval to integrate over is not infinity.
+        # https://en.wikipedia.org/wiki/Numerical_integration#Integrals_over_infinite_intervals
+        func_to_integrate = func_to_integrate(x/(1-x**2)) * (1+x**2)/((1-x**2)**2)
+        return (func_to_integrate.integrate(-1, 1, tol=tol))**(1/norm_type)
+    else:
+        raise ValueError("Must input a valid norm type. See Documentation or do: help(norm)")
+
+# Elementary Function instances
 exp = Function(math.exp)
 def _log(num):
     """Return ln(num) if num > 0 otherwise return nan.
